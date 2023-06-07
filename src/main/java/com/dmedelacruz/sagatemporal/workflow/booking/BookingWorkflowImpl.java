@@ -23,7 +23,7 @@ public class BookingWorkflowImpl implements BookingWorkflow {
             .setInitialInterval(Duration.ofSeconds(1))
             .setMaximumInterval(Duration.ofSeconds(100))
             .setBackoffCoefficient(2)
-            .setMaximumAttempts(3)
+            .setMaximumAttempts(10)
             .build();
 
     private final ActivityOptions defaultActivityOptions = ActivityOptions.newBuilder()

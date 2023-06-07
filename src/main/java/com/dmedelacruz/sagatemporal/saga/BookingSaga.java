@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -30,24 +31,34 @@ public class BookingSaga {
     private final WorkerService workerService;
 
 
-    public void processBooking(String namespace, BookingWorkflowRequest bookingWorkflowRequest) {
+    public String processBooking(String namespace, BookingWorkflowRequest bookingWorkflowRequest) {
 
-        WorkflowClient client = WorkflowClientFactory.getClient(namespace);
-        String taskQueue = BOOKING_TASK_QUEUE_PREFIX + UUID.randomUUID();
+        String workflowId = UUID.randomUUID().toString();
 
-        List<Class<?>> workflowList = List.of(BookingWorkflowImpl.class);
-        List<Object> activities = Arrays.asList(verificationActivity, paymentActivity, seatingActivity);
+        CompletableFuture.runAsync(() -> {
+            String taskQueue = BOOKING_TASK_QUEUE_PREFIX + workflowId;
 
-        //Start A Worker Instance
-        workerService.startWorker(client, taskQueue, workflowList, activities);
+            WorkflowClient client = WorkflowClientFactory.getClient(namespace);
 
-        //Create A Workflow Instance
-        WorkflowOptions options = WorkflowOptions.newBuilder().setTaskQueue(taskQueue).build();
-//        WorkflowOptions options = WorkflowOptions.newBuilder().setCronSchedule().setTaskQueue(taskQueue).build();
-        BookingWorkflow bookingWorkflow = client.newWorkflowStub(BookingWorkflow.class, options);
+            List<Class<?>> workflowList = List.of(BookingWorkflowImpl.class);
+            List<Object> activities = Arrays.asList(verificationActivity, paymentActivity, seatingActivity);
 
-        //Start Workflow
-        bookingWorkflow.processBooking(bookingWorkflowRequest);
+            //Start A Worker Instance
+            workerService.startWorker(client, taskQueue, workflowList, activities);
+
+            //Create A Workflow Instance
+            WorkflowOptions options = WorkflowOptions.newBuilder()
+                    .setWorkflowId(workflowId)
+                    .setTaskQueue(taskQueue)
+                    .build();
+    //        WorkflowOptions options = WorkflowOptions.newBuilder().setCronSchedule("").setTaskQueue(taskQueue).build();
+            BookingWorkflow bookingWorkflow = client.newWorkflowStub(BookingWorkflow.class, options);
+
+            //Start Workflow
+            bookingWorkflow.processBooking(bookingWorkflowRequest);
+        });
+
+        return workflowId;
     }
 
 }
