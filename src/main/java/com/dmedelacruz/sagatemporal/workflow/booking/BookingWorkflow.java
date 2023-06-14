@@ -1,5 +1,7 @@
 package com.dmedelacruz.sagatemporal.workflow.booking;
 
+import io.temporal.workflow.QueryMethod;
+import io.temporal.workflow.SignalMethod;
 import io.temporal.workflow.WorkflowInterface;
 import io.temporal.workflow.WorkflowMethod;
 
@@ -11,6 +13,8 @@ public interface BookingWorkflow {
      * Workflow completes when this method completes
      */
     @WorkflowMethod
-    BookingWorkflowResponse processBooking(BookingWorkflowRequest request);
+    BookingWorkflowResponse processBooking(String workflowId, BookingWorkflowRequest request);
 
+    @SignalMethod
+    void updatePayment(String workflowId, Boolean isApproved);
 }

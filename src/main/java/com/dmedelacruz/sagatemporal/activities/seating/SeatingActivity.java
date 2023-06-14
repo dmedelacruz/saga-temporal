@@ -7,7 +7,7 @@ import io.temporal.activity.ActivityMethod;
 public interface SeatingActivity {
 
     @ActivityMethod
-    SeatingActivityResponse updateSeating(SeatingActivityRequest request);
+    SeatingActivityResponse updateSeating(String workflowId, SeatingActivityRequest request) throws InterruptedException;
 
     @ActivityMethod
     SeatingActivityResponse failedUpdateSeating(String seatNumber);

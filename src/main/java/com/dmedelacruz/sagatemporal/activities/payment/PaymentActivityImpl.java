@@ -9,7 +9,10 @@ import java.util.UUID;
 @Component
 public class PaymentActivityImpl implements PaymentActivity {
     @Override
-    public PaymentActivityResponse processPayment(PaymentActivityRequest request) {
+    public PaymentActivityResponse processPayment(String workflowId, PaymentActivityRequest request) {
+
+        PaymentVerificationUtil.createPaymentVerificationRecord(workflowId, true);
+
         String receiptNumber = UUID.randomUUID().toString();
         LocalDateTime paymentDate = LocalDateTime.now();
         String confirmationNumber = UUID.randomUUID().toString();

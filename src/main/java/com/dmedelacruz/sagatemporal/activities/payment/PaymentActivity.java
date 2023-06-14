@@ -7,8 +7,9 @@ import io.temporal.activity.ActivityMethod;
 public interface PaymentActivity {
 
     @ActivityMethod
-    PaymentActivityResponse processPayment(PaymentActivityRequest request);
+    PaymentActivityResponse processPayment(String workflowId, PaymentActivityRequest request);
 
     @ActivityMethod
     PaymentActivityResponse reversePayment(String receiptNumber, String confirmationNumber);
+
 }
